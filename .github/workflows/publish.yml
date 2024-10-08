@@ -11,6 +11,7 @@ on:
 env:
   REGISTRY: ghcr.io
   REPO_NAME: kevintsander
+  IMAGE_NAME: rails-free-tds-image
 
 jobs:
   build:
@@ -30,10 +31,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./Dockerfile
           push: true
-          tags: ${{ env.REPO_NAME }}/rails-free-tds-image:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
